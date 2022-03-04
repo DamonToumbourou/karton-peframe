@@ -13,6 +13,11 @@ def get_info(result):
   virustotal = str(result['virustotal']['positives']) +'/'+ str(result['virustotal']['total'])
   
   file_information = {"filename": filename, "filetype": filetype, "sha256": sha256, "virustotal": virustotal}
+     
+  # docinfo
+  if result['docinfo']:
+    if result['docinfo']['macro']:
+      file_information = {"macro": True}
 
 
   if result['peinfo']:
@@ -89,9 +94,35 @@ def get_info(result):
       config["Breakpoint"] = _breakpoint
 
 
+  # strings
+  if result['strings']:
+    if result['strings']['ip']:
+      config["Ip Address"] = result['strings']['ip']
+
+    if result['strings']['url']:
+      config["Url"] = result['strings']['url']
+
+    if result['strings']['file']:
+      config["File"] = result['strings']['file']
+
+    if result['strings']['fuzzing']:
+      config["Fuzzing"] = result['strings']['fuzzing']
 
    
+  # docinfo
+  if result['yara_plugins']:
+    config["Yara Plugins"] = result['yara_plugins']
 
+
+  if result['docinfo']:
+    if result['docinfo']['behavior']:
+        config["Behavior"] = result['docinfo']['behavior']
+
+    if result['docinfo']['attributes']:
+      header('Attributes')
+      for item in result['docinfo']['attributes']:
+        print (item)
+        config["Behavior"] = result['docinfo']['behavior']
   
 
 
