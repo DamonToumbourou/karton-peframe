@@ -4,9 +4,8 @@ import os
 
 def get_info(result):
   
-  """ 
-    File Information
-  """
+  
+  # File Information
   filename = os.path.basename(result['filename'])
   filetype = result['filetype'][0:63]
   sha256 = result['hashes']['sha256']
@@ -14,7 +13,6 @@ def get_info(result):
   
   file_information = {"filename": filename, "filetype": filetype, "sha256": sha256, "virustotal": virustotal}
      
-  # docinfo
   if result['docinfo']:
     if result['docinfo']['macro']:
       file_information = {"macro": True}
@@ -38,7 +36,6 @@ def get_info(result):
     file_information["datetime"] = datetime
     file_information["dll"] = dll
 
-    # directories
     if result['peinfo']['directories']:
       directories_list = [k for k,v in result['peinfo']['directories'].items() if v]
       directories_list_temp = list(directories_list)
@@ -55,7 +52,6 @@ def get_info(result):
         file_information["directories"] = directories
 
 
-    # sections
     if result['peinfo']['sections']:
       section_list = [items['section_name'] for items in result['peinfo']['sections']['details']]
       section_list_temp = list(section_list)
@@ -67,7 +63,6 @@ def get_info(result):
         sections =  section_list_temp
         file_information["sections"] = sections
 
-    # features
     if result['peinfo']['features']:
       features_list = [k for k,v in result['peinfo']['features'].items() if v]
       if features_list:
@@ -88,12 +83,71 @@ def get_info(result):
       metadata = result['peinfo']['metadata']
       config["metadata"] = metadata
 
+  
     # breakpoint
     if result['peinfo']['breakpoint']:
       _breakpoint = result['peinfo']['breakpoint']
-      config["Breakpoint"] = _breakpoint
+      config["Possible Breakpoint"] = _breakpoint
 
+    # Crypto
+    if result['peinfo']['features']['crypto']:
+      config["Crypto"] = result['peinfo']['features']['crypto']
 
+    # Packer
+    if result['peinfo']['features']['packer']:
+      config["Packer"] = result['peinfo']['features']['packer']
+    
+    # xor
+    if result['peinfo']['features']['xor']:
+      config["Xor"] = result['peinfo']['features']['xor']
+    
+    # Mutex Api
+    if result['peinfo']['features']['mutex']:
+      config["Mutex Api"] = result['peinfo']['features']['mutex']
+
+    # Anti Debug
+    if result['peinfo']['features']['antidbg']:
+      config["Anti Debug"] = result['peinfo']['features']['antidbg']
+
+    # Anti VM
+    if result['peinfo']['features']['antivm']:
+      config["Anti Debug"] = result['peinfo']['features']['antivm']
+
+     # Sections Suspicious
+    sections_suspicious = {}
+    if result['peinfo']['sections']:
+      found = False
+      for item in result['peinfo']['sections']['details']:
+        if item['entropy'] > 6:
+          #print (item['section_name'].ljust(align, ' '), str(item['entropy'])[:4])
+          found = True
+          sections_suspicious[item['section_name']] = "entropy: " + str(item['entropy'])[:4]
+      if not found:
+        sections_suspicious[item['section_name']] = "For each section the value of entropy is less than 6"
+
+    config["Suspicious Sections"] = sections_suspicious
+
+    # Metadata
+    if result['peinfo']['metadata']:
+      config["Metadata"] = result['peinfo']['metadata']
+    
+    # Import function
+    if result['peinfo']['directories']['import']:
+      config["Import function"] = result['peinfo']['directories']['import']
+
+    # Export function
+    if result['peinfo']['directories']['export']:
+      config["Export function"] = result['peinfo']['directories']['export']
+    
+    # Signature
+    if result['peinfo']['directories']['sign']:
+      config["Signature"] = result['peinfo']['directories']['sign']
+
+  
+
+  """ 
+    Strings
+  """
   # strings
   if result['strings']:
     if result['strings']['ip']:
@@ -115,20 +169,17 @@ def get_info(result):
 
 
   if result['docinfo']:
+    # Doc Behaviour
     if result['docinfo']['behavior']:
         config["Behavior"] = result['docinfo']['behavior']
-
+    
+    # Attributes
     if result['docinfo']['attributes']:
-      header('Attributes')
-      for item in result['docinfo']['attributes']:
-        print (item)
-        config["Behavior"] = result['docinfo']['behavior']
+      config["Attributes"] = result['docinfo']['attributes']
+   
+
+   
   
-
-
-  """ 
-    Behavior
-  """
 
   return json.dumps(config)
 
