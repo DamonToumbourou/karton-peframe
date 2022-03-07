@@ -4,7 +4,7 @@ import os
 
 def get_info(result):
   
-  
+  config = {}
   # File Information
   filename = os.path.basename(result['filename'])
   filetype = result['filetype'][0:63]
@@ -17,7 +17,7 @@ def get_info(result):
     if result['docinfo']['macro']:
       file_information = {"macro": True}
 
-
+  
   if result['peinfo']:
     if hex(result['peinfo']['imagebase']) == '0x400000':
       imagebase = hex(result['peinfo']['imagebase'])
@@ -69,8 +69,6 @@ def get_info(result):
         features = features_list
         file_information["features"] = features
     
-    
-    config = {"File Information": file_information}
 
     # behavior
     if result['peinfo']['behavior']:
@@ -143,7 +141,8 @@ def get_info(result):
     if result['peinfo']['directories']['sign']:
       config["Signature"] = result['peinfo']['directories']['sign']
 
-  
+
+  config = {"File Information": file_information}
 
   """ 
     Strings
@@ -181,11 +180,11 @@ def get_info(result):
    
   
 
-  return json.dumps(config)
+  return (config)
 
 
 def run(filename):
    
 
     result = peframe.analyze(filename)
-    return get_info(result)
+    return get_info(json.dumps(result))
